@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use super::*;
-use async_raft::raft::EntryConfigChange;
+use agreed::raft::EntryConfigChange;
 
 const NODE_ID: u64 = 0;
 

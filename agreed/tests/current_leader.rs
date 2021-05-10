@@ -4,7 +4,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Result;
-use async_raft::Config;
+use agreed::Config;
 use tokio::time::sleep;
 
 use fixtures::RaftRouter;
@@ -16,7 +16,7 @@ use fixtures::RaftRouter;
 /// - create a stable 3-node cluster.
 /// - call the current_leader interface on the all nodes, and assert success.
 ///
-/// RUST_LOG=async_raft,memstore,client_reads=trace cargo test -p async-raft --test current_leader
+/// RUST_LOG=agreed,memstore,client_reads=trace cargo test -p async-raft --test current_leader
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn current_leader() -> Result<()> {
     fixtures::init_tracing();

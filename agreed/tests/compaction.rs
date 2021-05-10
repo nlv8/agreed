@@ -3,8 +3,8 @@ mod fixtures;
 use std::sync::Arc;
 
 use anyhow::Result;
-use async_raft::raft::MembershipConfig;
-use async_raft::{Config, SnapshotPolicy};
+use agreed::raft::MembershipConfig;
+use agreed::{Config, SnapshotPolicy};
 use maplit::hashset;
 
 use fixtures::{sleep_for_a_sec, RaftRouter};
@@ -23,7 +23,7 @@ const CLIENT_ID: &str = "client";
 ///   1. Send enough requests to the node that log compaction will be triggered.
 ///   1. Add a new node (Node 0), and assert that it received the snapshot.
 ///
-/// RUST_LOG=async_raft,memstore,compaction=trace cargo test -p async-raft --test compaction
+/// RUST_LOG=agreed,memstore,compaction=trace cargo test -p async-raft --test compaction
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn compaction() -> Result<()> {
     fixtures::init_tracing();

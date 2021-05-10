@@ -4,7 +4,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Result;
-use async_raft::Config;
+use agreed::Config;
 use tokio::time::sleep;
 
 use fixtures::RaftRouter;
@@ -19,7 +19,7 @@ use fixtures::RaftRouter;
 /// - asserts that the cluster was able to come online, and that the one node became leader.
 /// - asserts that the leader was able to successfully commit its initial payload.
 ///
-/// RUST_LOG=async_raft,memstore,singlenode=trace cargo test -p async-raft --test singlenode
+/// RUST_LOG=agreed,memstore,singlenode=trace cargo test -p async-raft --test singlenode
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn singlenode() -> Result<()> {
     fixtures::init_tracing();

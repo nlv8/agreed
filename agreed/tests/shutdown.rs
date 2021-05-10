@@ -4,7 +4,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::{anyhow, Result};
-use async_raft::Config;
+use agreed::Config;
 use tokio::time::sleep;
 
 use fixtures::RaftRouter;
@@ -17,7 +17,7 @@ use fixtures::RaftRouter;
 /// - after the cluster has been initialize, it performs a shutdown routine
 ///   on each node, asserting that the shutdown routine succeeded.
 ///
-/// RUST_LOG=async_raft,memstore,shutdown=trace cargo test -p async-raft --test shutdown
+/// RUST_LOG=agreed,memstore,shutdown=trace cargo test -p async-raft --test shutdown
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn initialization() -> Result<()> {
     fixtures::init_tracing();

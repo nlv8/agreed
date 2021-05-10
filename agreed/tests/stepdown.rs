@@ -3,7 +3,7 @@ mod fixtures;
 use std::sync::Arc;
 
 use anyhow::Result;
-use async_raft::{Config, State};
+use agreed::{Config, State};
 use maplit::hashset;
 use tracing::info;
 
@@ -21,7 +21,7 @@ const CLIENT_ID: &str = "client";
 ///   1. Ask the leader (Node 0) to remove itself from the cluster.
 ///   1. Ensure that the old leader (Node 0) no longer gets updates.
 ///
-/// RUST_LOG=async_raft,memstore,stepdown=trace cargo test -p async-raft --test stepdown
+/// RUST_LOG=agreed,memstore,stepdown=trace cargo test -p async-raft --test stepdown
 #[tokio::test(flavor = "multi_thread", worker_threads = 5)]
 async fn stepdown() -> Result<()> {
     fixtures::init_tracing();

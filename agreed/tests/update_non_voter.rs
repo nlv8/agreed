@@ -3,7 +3,7 @@ mod fixtures;
 use std::sync::Arc;
 
 use anyhow::Result;
-use async_raft::Config;
+use agreed::Config;
 
 use fixtures::{sleep_for_a_sec, RaftRouter};
 use tracing::info;
@@ -23,7 +23,7 @@ const CLUSTER_NAME: &str = "test";
 ///   1. Send requests to Node 0.
 ///   1. Assert that Node 1 received the updates.
 ///
-/// RUST_LOG=async_raft,memstore,dynamic_membership=trace cargo test -p async-raft --test dynamic_membership
+/// RUST_LOG=agreed,memstore,dynamic_membership=trace cargo test -p async-raft --test dynamic_membership
 #[tokio::test(flavor = "multi_thread", worker_threads = 6)]
 async fn update_non_voter() -> Result<()> {
     fixtures::init_tracing();

@@ -4,8 +4,8 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Result;
-use async_raft::raft::MembershipConfig;
-use async_raft::Config;
+use agreed::raft::MembershipConfig;
+use agreed::Config;
 use futures::prelude::*;
 use maplit::hashset;
 use tokio::time::sleep;
@@ -20,7 +20,7 @@ use fixtures::RaftRouter;
 /// - write a lot of data to it.
 /// - assert that the cluster stayed stable and has all of the expected data.
 ///
-/// RUST_LOG=async_raft,memstore,client_writes=trace cargo test -p async-raft --test client_writes
+/// RUST_LOG=agreed,memstore,client_writes=trace cargo test -p async-raft --test client_writes
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn client_writes() -> Result<()> {
     fixtures::init_tracing();
