@@ -139,7 +139,7 @@ jobs:
           command: test
           args: -p agreed --test update_non_voter          
 
-  agreed-integration-test:
+  agreed-release-build:
     name: Agreed Release Build
     runs-on: ubuntu-18.04
     needs: agreed-integration-test
