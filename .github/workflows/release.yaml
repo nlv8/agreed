@@ -1,0 +1,42 @@
+name: Release 
+
+on:
+  push:
+    tags:
+      - "v*"
+
+env:
+  RUST_TOOLCHAIN_VERSION: 1.52.0
+
+jobs:
+  crates-publish:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout the Repository
+        uses: actions/checkout@v2
+
+      - name: Setup the Rust Toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ env.RUST_TOOLCHAIN_VERSION }}
+          override: true
+
+      - name: Publish Agreed
+        run: cd agreed && cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
+
+  gh-release:
+    needs: crates-publish
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout the Repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Publish GH Pre-Release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

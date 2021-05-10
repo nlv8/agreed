@@ -1,0 +1,235 @@
+name: Continuous Integration
+
+on: [push, pull_request]
+
+env:
+  RUST_TOOLCHAIN_VERSION: 1.52.0
+
+jobs:
+  agreed-check:
+    name: Agreed Check
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout the Repository
+        uses: actions/checkout@v2
+
+      - name: Setup the Rust Toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ env.RUST_TOOLCHAIN_VERSION }}
+          override: true
+
+      - uses: Swatinem/rust-cache@v1
+        with:
+          sharedKey: ci
+
+      - name: cargo check
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+
+  agreed-unit-test:
+    name: Agreed Unit Test
+    runs-on: ubuntu-18.04
+    needs: [agreed-check, lint, format]
+    steps:
+      - name: Checkout the Repository
+        uses: actions/checkout@v2
+
+      - name: Setup the Rust Toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ env.RUST_TOOLCHAIN_VERSION }}
+          override: true
+
+      - uses: Swatinem/rust-cache@v1
+        with:
+          sharedKey: ci
+
+      - name: cargo test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: -p agreed --lib
+
+  agreed-integration-test:
+    name: Agreed Integration Test
+    runs-on: ubuntu-18.04
+    needs: agreed-unit-test
+    steps:
+      - name: Checkout the Repository
+        uses: actions/checkout@v2
+
+      - name: Setup the Rust Toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ env.RUST_TOOLCHAIN_VERSION }}
+          override: true
+
+      - uses: Swatinem/rust-cache@v1
+        with:
+          sharedKey: ci
+
+      - name: Integration Test | Client Reads
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: -p agreed --test client_reads
+
+      - name: Integration Test | Client Writes
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: -p agreed --test client_writes
+
+      - name: Integration Test | Compaction
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: -p agreed --test compaction
+
+      - name: Integration Test | Current Leader
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: -p agreed --test current_leader
+
+      - name: Integration Test | Dynamic Membership
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: -p agreed --test dynamic_membership
+
+      - name: Integration Test | Initialization
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: -p agreed --test initialization
+
+      - name: Integration Test | Remove Non-Voter
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: -p agreed --test remove_non_voter
+
+      - name: Integration Test | Shutdown
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: -p agreed --test shutdown
+
+      - name: Integration Test | Singlenode
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: -p agreed --test singlenode
+
+      - name: Integration Test | Stepdown
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: -p agreed --test stepdown
+
+      - name: Integration Test | Update Non-Voter
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: -p agreed --test update_non_voter          
+
+  agreed-integration-test:
+    name: Agreed Release Build
+    runs-on: ubuntu-18.04
+    needs: agreed-integration-test
+    steps:
+      - name: Checkout the Repository
+        uses: actions/checkout@v2
+
+      - name: Setup the Rust Toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ env.RUST_TOOLCHAIN_VERSION }}
+          override: true
+
+      - uses: Swatinem/rust-cache@v1
+        with:
+          sharedKey: ci    
+
+      - name: Build | Release Mode
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: -p agreed --release
+
+  memstore-build:
+    name: Memstore Build
+    runs-on: ubuntu-18.04
+    needs: [lint, format]
+    steps:
+      - name: Checkout the Repository
+        uses: actions/checkout@v2
+
+      - name: Setup the Rust Toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ env.RUST_TOOLCHAIN_VERSION }}
+          override: true
+          components: clippy
+
+      - name: Unit Tests
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: -p memstore
+
+      - name: Build | Release Mode
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: -p memstore --release
+
+  lint:
+    name: clippy
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout the Repository
+        uses: actions/checkout@v2
+
+      - name: Setup the Rust Toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ env.RUST_TOOLCHAIN_VERSION }}
+          override: true
+          components: clippy
+
+      - name: Clippy
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-targets -- -D warnings
+
+  format:
+    name: Format
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout the Repository
+        uses: actions/checkout@v2
+
+      - name: Setup the Rust Toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ env.RUST_TOOLCHAIN_VERSION }}
+          override: true
+          components: rustfmt
+
+      - name: cargo fmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
