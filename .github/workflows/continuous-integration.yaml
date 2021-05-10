@@ -193,7 +193,7 @@ jobs:
           args: -p memstore --release
 
   lint:
-    name: clippy
+    name: Lint
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout the Repository
