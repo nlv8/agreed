@@ -5,7 +5,6 @@
 use std::collections::{BTreeMap, HashSet};
 use std::sync::Arc;
 
-use anyhow::{anyhow, Result};
 use agreed::async_trait::async_trait;
 use agreed::error::{ChangeConfigError, ClientReadError, ClientWriteError};
 use agreed::raft::ClientWriteRequest;
@@ -15,6 +14,7 @@ use agreed::raft::{InstallSnapshotRequest, InstallSnapshotResponse};
 use agreed::raft::{VoteRequest, VoteResponse};
 use agreed::storage::RaftStorage;
 use agreed::{Config, NodeId, Raft, RaftMetrics, RaftNetwork, State};
+use anyhow::{anyhow, Result};
 use memstore::{ClientRequest as MemClientRequest, ClientResponse as MemClientResponse, MemStore};
 use tokio::sync::RwLock;
 use tokio::time::{sleep, Duration};

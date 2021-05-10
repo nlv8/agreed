@@ -3,8 +3,8 @@ mod fixtures;
 use std::sync::Arc;
 use std::time::Duration;
 
-use anyhow::Result;
 use agreed::Config;
+use anyhow::Result;
 use tokio::time::sleep;
 
 use fixtures::RaftRouter;

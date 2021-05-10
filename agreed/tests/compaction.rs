@@ -2,9 +2,9 @@ mod fixtures;
 
 use std::sync::Arc;
 
-use anyhow::Result;
 use agreed::raft::MembershipConfig;
 use agreed::{Config, SnapshotPolicy};
+use anyhow::Result;
 use maplit::hashset;
 
 use fixtures::{sleep_for_a_sec, RaftRouter};

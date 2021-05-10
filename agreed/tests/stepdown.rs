@@ -2,8 +2,8 @@ mod fixtures;
 
 use std::sync::Arc;
 
-use anyhow::Result;
 use agreed::{Config, State};
+use anyhow::Result;
 use maplit::hashset;
 use tracing::info;
 

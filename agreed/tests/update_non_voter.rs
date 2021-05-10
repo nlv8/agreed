@@ -2,8 +2,8 @@ mod fixtures;
 
 use std::sync::Arc;
 
-use anyhow::Result;
 use agreed::Config;
+use anyhow::Result;
 
 use fixtures::{sleep_for_a_sec, RaftRouter};
 use tracing::info;

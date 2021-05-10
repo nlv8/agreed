@@ -3,9 +3,9 @@ mod fixtures;
 use std::sync::Arc;
 use std::time::Duration;
 
-use anyhow::Result;
 use agreed::raft::MembershipConfig;
 use agreed::Config;
+use anyhow::Result;
 use futures::prelude::*;
 use maplit::hashset;
 use tokio::time::sleep;
