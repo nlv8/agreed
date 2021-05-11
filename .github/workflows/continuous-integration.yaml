@@ -164,8 +164,8 @@ jobs:
           command: build
           args: -p agreed --release
 
-  memstore-build:
-    name: Memstore Build
+  agreed-memstore-build:
+    name: Agreed Memstore Build
     runs-on: ubuntu-18.04
     needs: [lint, format]
     steps:
@@ -184,13 +184,13 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: -p memstore
+          args: -p agreed-memstore
 
       - name: Build | Release Mode
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: -p memstore --release
+          args: -p agreed-memstore --release
 
   lint:
     name: Lint

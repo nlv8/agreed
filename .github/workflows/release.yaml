@@ -25,6 +25,9 @@ jobs:
       - name: Publish Agreed
         run: cd agreed && cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
 
+      - name: Publish Agreed Memstore
+        run: cd agreed-memstore && cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
+
   gh-release:
     needs: crates-publish
     runs-on: ubuntu-18.04
