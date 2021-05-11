@@ -22,11 +22,11 @@ jobs:
           toolchain: ${{ env.RUST_TOOLCHAIN_VERSION }}
           override: true
 
-      - name: Publish Agreed Memstore
-        run: cd agreed-memstore && cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
-
       - name: Publish Agreed
         run: cd agreed && cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
+        
+      - name: Publish Agreed Memstore
+        run: cd agreed-memstore && cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
 
   gh-release:
     needs: crates-publish
