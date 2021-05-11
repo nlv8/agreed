@@ -77,67 +77,67 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: -p agreed --test client_reads
+          args: -p agreed-integration-tests --test client_reads
 
       - name: Integration Test | Client Writes
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: -p agreed --test client_writes
+          args: -p agreed-integration-tests --test client_writes
 
       - name: Integration Test | Compaction
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: -p agreed --test compaction
+          args: -p agreed-integration-tests --test compaction
 
       - name: Integration Test | Current Leader
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: -p agreed --test current_leader
+          args: -p agreed-integration-tests --test current_leader
 
       - name: Integration Test | Dynamic Membership
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: -p agreed --test dynamic_membership
+          args: -p agreed-integration-tests --test dynamic_membership
 
       - name: Integration Test | Initialization
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: -p agreed --test initialization
+          args: -p agreed-integration-tests --test initialization
 
       - name: Integration Test | Remove Non-Voter
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: -p agreed --test remove_non_voter
+          args: -p agreed-integration-tests --test remove_non_voter
 
       - name: Integration Test | Shutdown
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: -p agreed --test shutdown
+          args: -p agreed-integration-tests --test shutdown
 
       - name: Integration Test | Singlenode
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: -p agreed --test singlenode
+          args: -p agreed-integration-tests --test singlenode
 
       - name: Integration Test | Stepdown
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: -p agreed --test stepdown
+          args: -p agreed-integration-tests --test stepdown
 
       - name: Integration Test | Update Non-Voter
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: -p agreed --test update_non_voter          
+          args: -p agreed-integration-tests --test update_non_voter          
 
   agreed-release-build:
     name: Agreed Release Build

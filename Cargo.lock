@@ -4,6 +4,25 @@
 name = "agreed"
 version = "1.0.0"
 dependencies = [
+ "anyhow",
+ "async-trait",
+ "bytes",
+ "derive_more",
+ "futures",
+ "log",
+ "rand",
+ "serde",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "tracing-futures",
+]
+
+[[package]]
+name = "agreed-integration-tests"
+version = "1.0.0"
+dependencies = [
+ "agreed",
  "agreed-memstore",
  "anyhow",
  "async-trait",
