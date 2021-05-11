@@ -74,7 +74,7 @@ impl InitialState {
 
 /// A trait defining the interface for a Raft storage system.
 ///
-/// See the [storage chapter of the guide](https://async-raft.github.io/async-raft/storage.html)
+/// See the [storage chapter of the guide](https://nlv8.github.io/agreed/storage.html)
 /// for details and discussion on this trait and how to implement it.
 #[async_trait]
 pub trait RaftStorage<D, R>: Send + Sync + 'static
@@ -84,7 +84,7 @@ where
 {
     /// The storage engine's associated type used for exposing a snapshot for reading & writing.
     ///
-    /// See the [storage chapter of the guide](https://async-raft.github.io/async-raft/storage.html)
+    /// See the [storage chapter of the guide](https://nlv8.github.io/agreed/storage.html)
     /// for details on where and how this is used.
     type Snapshot: AsyncRead + AsyncWrite + AsyncSeek + Send + Unpin + 'static;
     /// The error type used to indicate to Raft that shutdown is needed when calling the
@@ -199,7 +199,7 @@ where
     /// the ID of the snapshot.
     ///
     /// ### implementation guide
-    /// See the [storage chapter of the guide](https://async-raft.github.io/async-raft/storage.html)
+    /// See the [storage chapter of the guide](https://nlv8.github.io/agreed/storage.html)
     /// for details on log compaction / snapshotting.
     ///
     /// Errors returned from this method will cause Raft to go into shutdown.

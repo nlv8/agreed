@@ -10,7 +10,7 @@
 [![Continuous Integration](https://github.com/nlv8/agreed/actions/workflows/continuous-integration.yaml/badge.svg)](https://github.com/nlv8/agreed/actions/workflows/continuous-integration.yaml)
 [![Crates.io](https://img.shields.io/crates/v/agreed.svg)](https://crates.io/crates/agreed)
 [![docs.rs](https://docs.rs/agreed/badge.svg)](https://docs.rs/agreed)
-[![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](LICENSE-MIT)
 
 </div>
 <br/>

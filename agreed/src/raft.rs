@@ -34,7 +34,7 @@ struct RaftInner<D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStora
 /// [the specification here](https://raft.github.io/raft.pdf) (**pdf warning**).
 ///
 /// For details and discussion on this API, see the
-/// [Raft API](https://async-raft.github.io/async-raft/raft.html) section of the guide.
+/// [Raft API](https://nlv8.github.io/agreed/raft.html) section of the guide.
 ///
 /// ### clone
 /// This type implements `Clone`, and should be cloned liberally. The clone itself is very cheap

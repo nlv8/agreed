@@ -17,7 +17,7 @@ use fixtures::RaftRouter;
 /// - call the client_read interface on the leader, and assert success.
 /// - call the client_read interface on the followers, and assert failure.
 ///
-/// RUST_LOG=agreed,memstore,client_reads=trace cargo test -p async-raft --test client_reads
+/// RUST_LOG=agreed,memstore,client_reads=trace cargo test -p agreed --test client_reads
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn client_reads() -> Result<()> {
     fixtures::init_tracing();

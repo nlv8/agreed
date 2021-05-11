@@ -16,7 +16,7 @@ use fixtures::RaftRouter;
 /// - create a stable 3-node cluster.
 /// - call the current_leader interface on the all nodes, and assert success.
 ///
-/// RUST_LOG=agreed,memstore,client_reads=trace cargo test -p async-raft --test current_leader
+/// RUST_LOG=agreed,memstore,client_reads=trace cargo test -p agreed --test current_leader
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn current_leader() -> Result<()> {
     fixtures::init_tracing();

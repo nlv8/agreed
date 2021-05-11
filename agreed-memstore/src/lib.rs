@@ -74,7 +74,7 @@ pub struct MemStoreStateMachine {
     pub client_status: HashMap<String, String>,
 }
 
-/// An in-memory storage system implementing the `async_raft::RaftStorage` trait.
+/// An in-memory storage system implementing the `agreed::RaftStorage` trait.
 pub struct MemStore {
     /// The ID of the Raft node for which this memory storage instances is configured.
     id: NodeId,

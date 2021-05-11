@@ -1,5 +1,5 @@
-Get To It
-=========
+# Get To It
+
 Rust is an outstanding language for building stateful systems.
 
 - We don't need to continue allocating all of the memory of all of the clouds to the JVM.

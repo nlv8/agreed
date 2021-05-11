@@ -474,7 +474,7 @@ impl<D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>> Ra
             _ => {
                 // This is unreachable, and well controlled by the type system, but let's log an
                 // error for good measure.
-                tracing::error!("unreachable branch hit within async-raft, attempting to forward a Raft internal entry");
+                tracing::error!("unreachable branch hit within agreed, attempting to forward a Raft internal entry");
             }
         }
     }

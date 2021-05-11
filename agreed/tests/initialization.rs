@@ -20,7 +20,7 @@ use fixtures::RaftRouter;
 /// - asserts that the leader was able to successfully commit its initial payload and that all
 ///   followers have successfully replicated the payload.
 ///
-/// RUST_LOG=agreed,memstore,initialization=trace cargo test -p async-raft --test initialization
+/// RUST_LOG=agreed,memstore,initialization=trace cargo test -p agreed --test initialization
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn initialization() -> Result<()> {
     fixtures::init_tracing();

@@ -15,7 +15,7 @@ use agreed::raft::{VoteRequest, VoteResponse};
 use agreed::storage::RaftStorage;
 use agreed::{Config, NodeId, Raft, RaftMetrics, RaftNetwork, State};
 use anyhow::{anyhow, Result};
-use memstore::{ClientRequest as MemClientRequest, ClientResponse as MemClientResponse, MemStore};
+use agreed_memstore::{ClientRequest as MemClientRequest, ClientResponse as MemClientResponse, MemStore};
 use tokio::sync::RwLock;
 use tokio::time::{sleep, Duration};
 use tracing_subscriber::prelude::*;

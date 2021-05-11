@@ -4,6 +4,7 @@
 name = "agreed"
 version = "1.0.0"
 dependencies = [
+ "agreed-memstore",
  "anyhow",
  "async-trait",
  "bytes",
@@ -11,7 +12,6 @@ dependencies = [
  "futures",
  "log",
  "maplit",
- "memstore",
  "rand",
  "serde",
  "thiserror",
@@ -19,6 +19,20 @@ dependencies = [
  "tracing",
  "tracing-futures",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "agreed-memstore"
+version = "0.2.0"
+dependencies = [
+ "agreed",
+ "anyhow",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "tracing-futures",
 ]
 
 [[package]]
@@ -253,20 +267,6 @@ name = "memchr"
 version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b16bd47d9e329435e309c58469fe0791c2d0d1ba96ec0954152a5ae2b04387dc"
-
-[[package]]
-name = "memstore"
-version = "0.2.0"
-dependencies = [
- "agreed",
- "anyhow",
- "serde",
- "serde_json",
- "thiserror",
- "tokio",
- "tracing",
- "tracing-futures",
-]
 
 [[package]]
 name = "num-integer"

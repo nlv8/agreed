@@ -1,15 +1,15 @@
 [package]
-name = "memstore"
+name = "agreed-memstore"
 version = "0.2.0"
 edition = "2018"
 categories = ["algorithms", "asynchronous", "data-structures"]
-description = "An in-memory implementation of the `async-raft::RaftStorage` trait."
+description = "An in-memory implementation of the `agreed::RaftStorage` trait."
 license = "MIT/Apache-2.0"
-authors = ["Anthony Dodd <dodd.anthonyjosiah@gmail.com>"]
-documentation = "https://docs.rs/memstore"
+authors = ["Attila Bagossy <attila.bagossy@nlv8.com>"]
+documentation = "https://docs.rs/agreed-memstore"
 keywords = ["raft", "consensus", "data-storage"]
-homepage = "https://github.com/async-raft/async-raft"
-repository = "https://github.com/async-raft/async-raft"
+homepage = "https://github.com/agreed/agreed"
+repository = "https://github.com/agreed/agreed"
 readme = "README.md"
 
 [dependencies]

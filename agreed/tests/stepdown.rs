@@ -21,7 +21,7 @@ const CLIENT_ID: &str = "client";
 ///   1. Ask the leader (Node 0) to remove itself from the cluster.
 ///   1. Ensure that the old leader (Node 0) no longer gets updates.
 ///
-/// RUST_LOG=agreed,memstore,stepdown=trace cargo test -p async-raft --test stepdown
+/// RUST_LOG=agreed,memstore,stepdown=trace cargo test -p agreed --test stepdown
 #[tokio::test(flavor = "multi_thread", worker_threads = 5)]
 async fn stepdown() -> Result<()> {
     fixtures::init_tracing();

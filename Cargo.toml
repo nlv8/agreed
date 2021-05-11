@@ -1,5 +1,5 @@
 [workspace]
 members = [
     "agreed",
-    "memstore",
+    "agreed-memstore",
 ]

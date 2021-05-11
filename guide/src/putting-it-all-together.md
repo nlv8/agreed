@@ -1,10 +1,11 @@
-Putting It All Together
-=======================
+# Putting It All Together
+
 In previous chapters we've seen how to define our application's data types which will be used for interacting with Raft, we've seen how to implement the `RaftNetwork` trait, we've seen how to implement the `RaftStorage` trait, and we've reviewed the `Raft` API itself. Now its time to put all of these components together. Let's do this.
 
-For this chapter, we're going to use snippets of the code found in the `memstore` crate, which is an in-memory implementation of the `RaftStorage` trait for demo and testing purposes, which also happens to be used for all of the integration tests of `async-raft` itself.
+For this chapter, we're going to use snippets of the code found in the `memstore` crate, which is an in-memory implementation of the `RaftStorage` trait for demo and testing purposes, which also happens to be used for all of the integration tests of `agreed` itself.
 
 ### Recap On Our Data Types
+
 As we've seen earlier, here are our `AppData` and `AppDataResponse` types/impls.
 
 ```rust
@@ -33,8 +34,9 @@ pub struct ClientResponse(Result<Option<String>, ClientError>);
 impl AppDataResponse for ClientResponse {}
 ```
 
-### RaftNetwork impl
-We've already discussed the `RaftNetwork` trait in a previous chapter. Here is an abbreviated snippet of what the `RaftNetwork` impl looks like in the `async-raft` integration test suite.
+### RaftNetwork implementation
+
+We've already discussed the `RaftNetwork` trait in a previous chapter. Here is an abbreviated snippet of what the `RaftNetwork` impl looks like in the `agreed` integration test suite.
 
 ```rust
 // We use anyhow::Result in our impl below.
@@ -64,7 +66,8 @@ impl RaftNetwork<ClientRequest> for RaftRouter {
 }
 ```
 
-### RaftStorage impl
+### RaftStorage implementation
+
 We've already got a `RaftStorage` impl to work with from the `memstore` crate. Here is an abbreviated snippet of the code.
 
 ```rust
@@ -90,6 +93,7 @@ impl RaftStorage<ClientRequest, ClientResponse> for MemStore {
 ```
 
 ### Raft Type Alias
+
 For better readability in your application's code, it would be beneficial to define a type alias which fully qualifies all of the types which your Raft instance will be using. This is quite simple. The example below is taken directly from this project's integration test suite, which uses the `memstore` crate and a specialized `RaftNetwork` impl designed specifically for testing.
 
 ```rust
@@ -98,6 +102,7 @@ pub type MemRaft = Raft<ClientRequest, ClientResponse, RaftRouter, MemStore>;
 ```
 
 ### Give It The Boot
+
 Though applications will be much more complex than this contrived example, booting a Raft node is dead simple. Even if your application uses a multi-Raft pattern for managing different segments / shards of data, the same principal applies. Boot a Raft node, and retain its instance for API usage.
 
 ```rust

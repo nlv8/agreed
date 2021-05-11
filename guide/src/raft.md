@@ -1,5 +1,5 @@
-Raft API
-========
+# Raft API
+
 The `Raft` type represents the singular API of this crate, and is the interface to a running Raft node. It is highly generic, which allows your application's data types to be known at compile time, for maximum performance and type-safety. Users of this Raft implementation get to choose the exact types to be used throughout the system, and get to work with their application's data types directly without the overhead of serializing and deserializing the data as it moves through the `Raft` system.
 
 In previous chapters, we've defined our `AppData`, `AppDataResponse`, `RaftNetwork` and `RaftStorage` types. These four types are used as part of a concrete `Raft` definition, and applications may find it beneficial to define an alias covering all of these types for easier reference. Something like the following:
@@ -10,35 +10,41 @@ type YourRaft = Raft<YourData, YourDataResponse, YourRaftNetwork, YourRaftStorag
 ```
 
 ### API
+
 The API of the `Raft` type is broken up into 4 sections: Client Requests, Raft RPCs, Admin Commands & Utility Methods.
 
 #### Client Requests
+
 The application level interface for clients is 100% at the discretion of the application being built. However, once a client read or write operation is ready to be processed, the below methods provide the read/write functionality for Raft interaction.
 
-- [`async fn client_read(...) -> Result<...>`](https://docs.rs/async-raft/latest/async_raft/raft/struct.Raft.html#method.client_read): Check to ensure this node is still the cluster leader, in order to guard against stale reads. The actual read operation itself is up to the application, this method just ensures that the read will not be stale.
-- [`async fn client_write(...) -> Result<...>`](https://docs.rs/async-raft/latest/async_raft/raft/struct.Raft.html#method.client_write): Submit a mutating client request to Raft to update the state of the system (§5.1). It will be appended to the log, committed to the cluster, and then applied to the application state machine. The result of applying the request to the state machine will be returned as the response from this method.
+- [`async fn client_read(...) -> Result<...>`](https://docs.rs/agreed/latest/agreed/raft/struct.Raft.html#method.client_read): Check to ensure this node is still the cluster leader, in order to guard against stale reads. The actual read operation itself is up to the application, this method just ensures that the read will not be stale.
+- [`async fn client_write(...) -> Result<...>`](https://docs.rs/agreed/latest/agreed/raft/struct.Raft.html#method.client_write): Submit a mutating client request to Raft to update the state of the system (§5.1). It will be appended to the log, committed to the cluster, and then applied to the application state machine. The result of applying the request to the state machine will be returned as the response from this method.
 
 #### Raft RPCs
+
 These methods directly correspond to the `RaftNetwork` trait described in earlier chapters. The application is responsible for implementing its own network layer which can receive these RPCs coming from Raft peers, and should then pass them into the Raft node using the following methods.
 
-- [`async fn append_entries(...) -> Result<...>`](https://docs.rs/async-raft/latest/async_raft/raft/struct.Raft.html#method.append_entries): An RPC invoked by the leader to replicate log entries (§5.3); also used as heartbeat (§5.2).
-- [`async fn vote(...) -> Result<...>`](https://docs.rs/async-raft/latest/async_raft/raft/struct.Raft.html#method.vote): An RPC invoked by candidates to gather votes (§5.2).
-- [`async fn install_snapshot(...) -> Result<...>`](https://docs.rs/async-raft/latest/async_raft/raft/struct.Raft.html#method.install_snapshot): Invoked by the Raft leader to send chunks of a snapshot to a follower (§7).
+- [`async fn append_entries(...) -> Result<...>`](https://docs.rs/agreed/latest/agreed/raft/struct.Raft.html#method.append_entries): An RPC invoked by the leader to replicate log entries (§5.3); also used as heartbeat (§5.2).
+- [`async fn vote(...) -> Result<...>`](https://docs.rs/agreed/latest/agreed/raft/struct.Raft.html#method.vote): An RPC invoked by candidates to gather votes (§5.2).
+- [`async fn install_snapshot(...) -> Result<...>`](https://docs.rs/agreed/latest/agreed/raft/struct.Raft.html#method.install_snapshot): Invoked by the Raft leader to send chunks of a snapshot to a follower (§7).
 
 #### Admin Commands
-All of these methods are intended for use directly by the parent application for managing various lifecycles of the cluster. Each of these lifecycles are discussed in more detail in the [Cluster Controls](https://async-raft.github.io/async-raft/cluster-controls.html) chapter.
 
-- [`async fn initialize(...) -> Result<...>`](https://docs.rs/async-raft/latest/async_raft/raft/struct.Raft.html#method.initialize): Initialize a pristine Raft node with the given config & start a campaign to become leader.
-- [`async fn add_non_voter(...) -> Result<...>`](https://docs.rs/async-raft/latest/async_raft/raft/struct.Raft.html#method.add_non_voter): Add a new node to the cluster as a non-voter, which will sync the node with the master so that it can later join the cluster as a voting member.
-- [`async fn remove_non_voter(...) -> Result<...>`](https://docs.rs/async-raft/latest/async_raft/raft/struct.Raft.html#method.remove_non_voter): Remove a previously added non-voter member of the cluster.
-- [`async fn add_voter(...) -> Result<...>`](https://docs.rs/async-raft/latest/async_raft/raft/struct.Raft.html#method.add_voter): Add a new node to the cluster as a proper Voter member. If necessary, the node will first be added as a Non-Voter, synced, and then promoted to Voter.
-- [`async fn remove_voter(...) -> Result<...>`](https://docs.rs/async-raft/latest/async_raft/raft/struct.Raft.html#method.remove_voter): Remove a Voter member of the cluster.
+All of these methods are intended for use directly by the parent application for managing various lifecycles of the cluster. Each of these lifecycles are discussed in more detail in the [Cluster Controls](https://nlv8.github.io/agreed/cluster-controls.html) chapter.
+
+- [`async fn initialize(...) -> Result<...>`](https://docs.rs/agreed/latest/agreed/raft/struct.Raft.html#method.initialize): Initialize a pristine Raft node with the given config & start a campaign to become leader.
+- [`async fn add_non_voter(...) -> Result<...>`](https://docs.rs/agreed/latest/agreed/raft/struct.Raft.html#method.add_non_voter): Add a new node to the cluster as a non-voter, which will sync the node with the master so that it can later join the cluster as a voting member.
+- [`async fn remove_non_voter(...) -> Result<...>`](https://docs.rs/agreed/latest/agreed/raft/struct.Raft.html#method.remove_non_voter): Remove a previously added non-voter member of the cluster.
+- [`async fn add_voter(...) -> Result<...>`](https://docs.rs/agreed/latest/agreed/raft/struct.Raft.html#method.add_voter): Add a new node to the cluster as a proper Voter member. If necessary, the node will first be added as a Non-Voter, synced, and then promoted to Voter.
+- [`async fn remove_voter(...) -> Result<...>`](https://docs.rs/agreed/latest/agreed/raft/struct.Raft.html#method.remove_voter): Remove a Voter member of the cluster.
 
 #### Utility Methods
-- [`fn metrics(&self) -> watch::Receiver<RaftMetrics>`](https://docs.rs/async-raft/latest/async_raft/raft/struct.Raft.html#method.metrics): Get a stream of all metrics coming from the Raft node.
-- [`fn shutdown(self) -> tokio::task::JoinHandle<RaftResult<()>>`](https://docs.rs/async-raft/latest/async_raft/raft/struct.Raft.html#method.shutdown): Send a shutdown signal to the Raft node, and get a `JoinHandle` which can be used to await the full shutdown of the node. If the node is already in shutdown, this routine will allow you to await its full shutdown.
+
+- [`fn metrics(&self) -> watch::Receiver<RaftMetrics>`](https://docs.rs/agreed/latest/agreed/raft/struct.Raft.html#method.metrics): Get a stream of all metrics coming from the Raft node.
+- [`fn shutdown(self) -> tokio::task::JoinHandle<RaftResult<()>>`](https://docs.rs/agreed/latest/agreed/raft/struct.Raft.html#method.shutdown): Send a shutdown signal to the Raft node, and get a `JoinHandle` which can be used to await the full shutdown of the node. If the node is already in shutdown, this routine will allow you to await its full shutdown.
 
 ### Reading & Writing Data
+
 What does the Raft spec have to say about reading and writing data?
 
 > Clients of Raft send all of their requests to the leader. When a client first starts up, it connects to a randomly-chosen server. If the client’s first choice is not the leader, that server will reject the client’s request and supply information about the most recent leader it has heard from. If the leader crashes, client requests will timeout; clients then try again with randomly-chosen servers.

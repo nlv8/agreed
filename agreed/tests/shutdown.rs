@@ -17,7 +17,7 @@ use fixtures::RaftRouter;
 /// - after the cluster has been initialize, it performs a shutdown routine
 ///   on each node, asserting that the shutdown routine succeeded.
 ///
-/// RUST_LOG=agreed,memstore,shutdown=trace cargo test -p async-raft --test shutdown
+/// RUST_LOG=agreed,memstore,shutdown=trace cargo test -p agreed --test shutdown
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn initialization() -> Result<()> {
     fixtures::init_tracing();

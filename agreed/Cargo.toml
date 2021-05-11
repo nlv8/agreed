@@ -2,14 +2,14 @@
 name = "agreed"
 version = "1.0.0"
 edition = "2018"
-authors = ["Anthony Dodd <Dodd.AnthonyJosiah@gmail.com>"]
+authors = ["Attila Bagossy <attila.bagossy@nlv8.com>"]
 categories = ["algorithms", "asynchronous", "data-structures"]
 description = "An async implementation of the Raft distributed consensus protocol."
 documentation = "https://docs.rs/agreed"
 homepage = "https://github.com/nlv8/agreed"
 keywords = ["raft", "consensus", "data-storage"]
 license = "MIT/Apache-2.0"
-repository = "https://github.com/async-raft/agreed"
+repository = "https://github.com/nlv8/agreed"
 readme = "../README.md"
 
 [dependencies]
@@ -28,7 +28,7 @@ tracing-futures = "0.2.4"
 
 [dev-dependencies]
 maplit = "1.0.2"
-memstore = { version="0.2.0", path="../memstore" }
+agreed-memstore = { path="../agreed-memstore" }
 tracing-subscriber = "0.2.10"
 
 [features]
