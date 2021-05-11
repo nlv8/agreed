@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Putting It All Together - Async Raft</title>
+        <title>Putting It All Together - The Agreed Guide</title>
         
         
 
@@ -13,7 +13,7 @@
 
 
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <meta name="description" content="The async-raft user guide.">
+        <meta name="description" content="User guide for the Agreed library.">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
 
@@ -127,7 +127,7 @@
                         
                     </div>
 
-                    <h1 class="menu-title">Async Raft</h1>
+                    <h1 class="menu-title">The Agreed Guide</h1>
 
                     <div class="right-buttons">
                         
@@ -165,7 +165,7 @@
                     <main>
                         <h1 id="putting-it-all-together"><a class="header" href="#putting-it-all-together">Putting It All Together</a></h1>
 <p>In previous chapters we've seen how to define our application's data types which will be used for interacting with Raft, we've seen how to implement the <code>RaftNetwork</code> trait, we've seen how to implement the <code>RaftStorage</code> trait, and we've reviewed the <code>Raft</code> API itself. Now its time to put all of these components together. Let's do this.</p>
-<p>For this chapter, we're going to use snippets of the code found in the <code>memstore</code> crate, which is an in-memory implementation of the <code>RaftStorage</code> trait for demo and testing purposes, which also happens to be used for all of the integration tests of <code>async-raft</code> itself.</p>
+<p>For this chapter, we're going to use snippets of the code found in the <code>memstore</code> crate, which is an in-memory implementation of the <code>RaftStorage</code> trait for demo and testing purposes, which also happens to be used for all of the integration tests of <code>agreed</code> itself.</p>
 <h3 id="recap-on-our-data-types"><a class="header" href="#recap-on-our-data-types">Recap On Our Data Types</a></h3>
 <p>As we've seen earlier, here are our <code>AppData</code> and <code>AppDataResponse</code> types/impls.</p>
 <pre><pre class="playground"><code class="language-rust">
@@ -196,8 +196,8 @@ pub struct ClientResponse(Result&lt;Option&lt;String&gt;, ClientError&gt;);
 impl AppDataResponse for ClientResponse {}
 <span class="boring">}
 </span></code></pre></pre>
-<h3 id="raftnetwork-impl"><a class="header" href="#raftnetwork-impl">RaftNetwork impl</a></h3>
-<p>We've already discussed the <code>RaftNetwork</code> trait in a previous chapter. Here is an abbreviated snippet of what the <code>RaftNetwork</code> impl looks like in the <code>async-raft</code> integration test suite.</p>
+<h3 id="raftnetwork-implementation"><a class="header" href="#raftnetwork-implementation">RaftNetwork implementation</a></h3>
+<p>We've already discussed the <code>RaftNetwork</code> trait in a previous chapter. Here is an abbreviated snippet of what the <code>RaftNetwork</code> impl looks like in the <code>agreed</code> integration test suite.</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -228,7 +228,7 @@ impl RaftNetwork&lt;ClientRequest&gt; for RaftRouter {
 }
 <span class="boring">}
 </span></code></pre></pre>
-<h3 id="raftstorage-impl"><a class="header" href="#raftstorage-impl">RaftStorage impl</a></h3>
+<h3 id="raftstorage-implementation"><a class="header" href="#raftstorage-implementation">RaftStorage implementation</a></h3>
 <p>We've already got a <code>RaftStorage</code> impl to work with from the <code>memstore</code> crate. Here is an abbreviated snippet of the code.</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]

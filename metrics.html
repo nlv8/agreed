@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Metrics - Async Raft</title>
+        <title>Metrics - The Agreed Guide</title>
         
         
 
@@ -13,7 +13,7 @@
 
 
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <meta name="description" content="The async-raft user guide.">
+        <meta name="description" content="User guide for the Agreed library.">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
 
@@ -127,7 +127,7 @@
                         
                     </div>
 
-                    <h1 class="menu-title">Async Raft</h1>
+                    <h1 class="menu-title">The Agreed Guide</h1>
 
                     <div class="right-buttons">
                         
@@ -164,7 +164,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="metrics"><a class="header" href="#metrics">Metrics</a></h1>
-<p><code>Raft</code> exports metrics on its internal state via the <code>Raft.metrics</code> method, which returns a stream of <a href="https://docs.rs/crate/async-raft/latest/async_raft/metrics/struct.RaftMetrics.html"><code>RaftMetrics</code></a>. The metrics themselves describe the state of the Raft node, its current role in the cluster, its current membership config, as well as information on the Raft log and the last index to be applied to the state machine.</p>
+<p><code>Raft</code> exports metrics on its internal state via the <code>Raft.metrics</code> method, which returns a stream of <a href="https://docs.rs/crate/agreed/latest/agreed/metrics/struct.RaftMetrics.html"><code>RaftMetrics</code></a>. The metrics themselves describe the state of the Raft node, its current role in the cluster, its current membership config, as well as information on the Raft log and the last index to be applied to the state machine.</p>
 <p>Applications may use this data in whatever way is needed. The obvious use cases are to expose these metrics to a metrics collection system, such as Prometheus, TimescaleDB, Influx &amp;c. Applications may also use this data to trigger events within higher levels of the application itself.</p>
 
                     </main>

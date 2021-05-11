@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Getting Started - Async Raft</title>
+        <title>Getting Started - The Agreed Guide</title>
         
         
 
@@ -13,7 +13,7 @@
 
 
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <meta name="description" content="The async-raft user guide.">
+        <meta name="description" content="User guide for the Agreed library.">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
 
@@ -127,7 +127,7 @@
                         
                     </div>
 
-                    <h1 class="menu-title">Async Raft</h1>
+                    <h1 class="menu-title">The Agreed Guide</h1>
 
                     <div class="right-buttons">
                         
@@ -170,12 +170,12 @@
     <img style="max-width:600px;" src="./images/raft-overview.png"/>
 </p>
 <p>Raft is intended to run within some parent application, which traditionally will be some sort of data storage system (SQL, NoSQL, KV store, AMQP, Streaming, Graph, whatever). You can do whatever you want with your application, Raft will provide you with the consensus module.</p>
-<h2 id="first-steps"><a class="header" href="#first-steps">first steps</a></h2>
-<p>In order to start using Raft, you will need to declare the data types you will use for client requests and client responses. Let's do that now. Throughout this guide, we will be using the <code>memstore</code> crate, which is an in-memory implementation of the <code>RaftStorage</code> trait for demo and testing purposes (part of the same repo). This will give us a concrete set of examples to work with, which also happen to be used for all of the integration tests of <code>async-raft</code> itself.</p>
-<h3 id="async_raftappdata"><a class="header" href="#async_raftappdata"><code>async_raft::AppData</code></a></h3>
+<h2 id="first-steps"><a class="header" href="#first-steps">First Steps</a></h2>
+<p>In order to start using Raft, you will need to declare the data types you will use for client requests and client responses. Let's do that now. Throughout this guide, we will be using the <code>memstore</code> crate, which is an in-memory implementation of the <code>RaftStorage</code> trait for demo and testing purposes (part of the same repo). This will give us a concrete set of examples to work with, which also happen to be used for all of the integration tests of <code>agreed</code> itself.</p>
+<h3 id="agreedappdata"><a class="header" href="#agreedappdata"><code>agreed::AppData</code></a></h3>
 <p>This marker trait is used to declare an application's data type. It has the following constraints: <code>Clone + Debug + Send + Sync + Serialize + DeserializeOwned + 'static</code>. Your data type represents the requests which will be sent to your application to create, update and delete data. Requests to read data should not be sent through Raft, only mutating requests. More on linearizable reads, and how to avoid stale reads, is discussed in the <a href="./raft.html">Raft API chapter</a>.</p>
 <p>The intention of this trait is that applications which are using this crate will be able to use their own concrete data types throughout their application without having to serialize and deserialize their data as it goes through Raft. Instead, applications can present their data models as-is to Raft, Raft will present it to the application's <code>RaftStorage</code> impl when ready, and the application may then deal with the data directly in the storage engine without having to do a preliminary deserialization.</p>
-<h5 id="impl"><a class="header" href="#impl">impl</a></h5>
+<h5 id="implementation"><a class="header" href="#implementation">Implementation</a></h5>
 <p>Finishing up this step is easy, just <code>impl AppData for YourData {}</code> ... and in most cases, that's it. You'll need to be sure that the aforementioned constraints are satisfied on <code>YourData</code>. The following derivation should do the trick <code>#[derive(Clone, Debug, Serialize, Deserialize)]</code>.</p>
 <p>In the <code>memstore</code> crate, here is a snippet of what the code looks like:</p>
 <pre><pre class="playground"><code class="language-rust">
@@ -193,11 +193,11 @@ pub struct ClientRequest {
 impl AppData for ClientRequest {}
 <span class="boring">}
 </span></code></pre></pre>
-<h3 id="async_raftappdataresponse"><a class="header" href="#async_raftappdataresponse"><code>async_raft::AppDataResponse</code></a></h3>
+<h3 id="agreedappdataresponse"><a class="header" href="#agreedappdataresponse"><code>agreed::AppDataResponse</code></a></h3>
 <p>This marker trait is used to declare an application's response data. It has the following constraints: <code>Clone + Debug + Send + Sync + Serialize + DeserializeOwned + 'static</code>.</p>
 <p>The intention of this trait is that applications which are using this crate will be able to use their own concrete data types for returning response data from the storage layer when an entry is applied to the state machine as part of a client request (this is not used during replication). This allows applications to seamlessly return application specific data from their storage layer, up through Raft, and back into their application for returning data to clients.</p>
 <p>This type must encapsulate both success and error responses, as application specific logic related to the success or failure of a client request — application specific validation logic, enforcing of data constraints, and anything of that nature — are expressly out of the realm of the Raft consensus protocol.</p>
-<h5 id="impl-1"><a class="header" href="#impl-1">impl</a></h5>
+<h5 id="implementation-1"><a class="header" href="#implementation-1">Implementation</a></h5>
 <p>Finishing up this step is also easy: <code>impl AppDataResponse for YourDataResponse {}</code>. The aforementioned derivation applies here as well.</p>
 <p>In the <code>memstore</code> crate, here is a snippet of what the code looks like:</p>
 <pre><pre class="playground"><code class="language-rust">

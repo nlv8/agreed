@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Cluster Controls - Async Raft</title>
+        <title>Cluster Controls - The Agreed Guide</title>
         
         
 
@@ -13,7 +13,7 @@
 
 
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <meta name="description" content="The async-raft user guide.">
+        <meta name="description" content="User guide for the Agreed library.">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
 
@@ -127,7 +127,7 @@
                         
                     </div>
 
-                    <h1 class="menu-title">Async Raft</h1>
+                    <h1 class="menu-title">The Agreed Guide</h1>
 
                     <div class="right-buttons">
                         
@@ -165,7 +165,7 @@
                     <main>
                         <h1 id="cluster-controls"><a class="header" href="#cluster-controls">Cluster Controls</a></h1>
 <p>Raft nodes may be controlled in various ways outside of the normal flow of the Raft protocol using some of the API methods of the <code>Raft</code> type. This allows the parent application — within which the Raft node is running — to influence the Raft node's behavior based on application level needs.</p>
-<h3 id="concepts"><a class="header" href="#concepts">concepts</a></h3>
+<h3 id="concepts"><a class="header" href="#concepts">Concepts</a></h3>
 <p>In the world of Raft consensus, there are a few aspects of a Raft node's lifecycle which are not directly dictated in the Raft spec. Cluster formation and the preliminary details of what would lead to dynamic cluster membership changes are a few examples of concepts not directly detailed in the spec. This implementation of Raft offers as much flexibility as possible to deal with such details in a way which is safe according to the Raft specification, but also in a way which preserves flexibility for the many different types of applications which may be implemented using Raft.</p>
 
                     </main>
