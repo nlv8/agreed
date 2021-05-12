@@ -2,7 +2,7 @@
 # It is not intended for manual editing.
 [[package]]
 name = "agreed"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -20,7 +20,7 @@ dependencies = [
 
 [[package]]
 name = "agreed-integration-tests"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "agreed",
  "agreed-memstore",
@@ -42,7 +42,7 @@ dependencies = [
 
 [[package]]
 name = "agreed-memstore"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "agreed",
  "anyhow",

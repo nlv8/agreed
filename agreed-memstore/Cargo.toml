@@ -1,6 +1,6 @@
 [package]
 name = "agreed-memstore"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2018"
 categories = ["algorithms", "asynchronous", "data-structures"]
 description = "An in-memory implementation of the `agreed::RaftStorage` trait. Fork of async-raft's memstore crate."
@@ -14,7 +14,7 @@ readme = "README.md"
 
 [dependencies]
 anyhow = "1.0.40"
-agreed = { version="1.0.0", path="../agreed" }
+agreed = { version="1.0.1", path="../agreed" }
 serde = { version="1.0.125", features=["derive"] }
 serde_json = "1.0.64"
 thiserror = "1.0.24"

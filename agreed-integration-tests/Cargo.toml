@@ -1,6 +1,6 @@
 [package]
 name = "agreed-integration-tests"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2018"
 authors = ["Attila Bagossy <attila.bagossy@nlv8.com>"]
 categories = ["algorithms", "asynchronous", "data-structures"]
@@ -26,6 +26,6 @@ tokio = { version="1.0", default-features=false, features=["fs", "io-util", "mac
 tracing = "0.1"
 tracing-futures = "0.2.5"
 maplit = "1.0.2"
-agreed = { version="1.0.0", path="../agreed" }
-agreed-memstore = { version="1.0.0", path="../agreed-memstore" }
+agreed = { version="1.0.1", path="../agreed" }
+agreed-memstore = { version="1.0.1", path="../agreed-memstore" }
 tracing-subscriber = "0.2.18"

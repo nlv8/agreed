@@ -1,6 +1,6 @@
 [package]
 name = "agreed"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2018"
 authors = ["Attila Bagossy <attila.bagossy@nlv8.com>"]
 categories = ["algorithms", "asynchronous", "data-structures"]
