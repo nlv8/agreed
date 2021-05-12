@@ -113,14 +113,16 @@ The follower can include the term of the conflicting entry and the first index i
 
 ## Configuration Changes
 
-In order to ensure safety, configuration changes must use a two-phase approach, called `joint consensus`. §6
+This implementation of Raft supports configuration changes via single-node operations. The original Raft paper featured a much more complex solution, called `joint consensus`, which is a two-phase approach allowing transitions betwen arbitrary configurations. However, the authors realized, that the `joint consensus` is overly complex, and every possible transition can be broken down into a series of single-node operations. The benefit of such single-node operations, both from the implementor's and the consumer's perspective, is their simplicity and easy-to-understand nature. The downside is that larger reconfigurations may involve more steps than desired.
 
-  * once a server adds a new configuration entry to its log, it uses that configuration for all future decisions (a server always uses the latest configuration in its log, regardless of whether the entry is committed). §6
-  * when joint consensus is entered, log entries are replicated to all servers in both configurations. §6
-  * any server from either configuration may serve as leader. §6
-  * agreement (for elections and entry commitment) requires separate majorities from both the old and new configurations. §6
-  *in order to avoid availability gaps, Raft introduces an additional phase before the configuration change, in which the new servers join the cluster as non-voting members (the leader replicates log entries to them, but they are not considered for majorities). Once the new servers have caught up with the rest of the cluster, the reconfiguration can proceed as described above. §6
-  * in the case where the cluster leader is not part of the new configuration, the leader steps down (returns to follower state) once it has committed the log entry of the new configuration. This means that there will be a period of time (while it is committing the new configuration) when the leader is managing a cluster that does not include itself; it replicates log entries but does not count itself in majorities. The leader transition occurs when the new configuration is committed because this is the first point when the new configuration can operate independently (it will always be possible to choose a leader from the new configuration). Before this point, it may be the case that only a server from the old configuration can be elected leader. §6
+So, how do changes happen exactly?
+
+  * Once a server adds a new configuration entry to its log, it uses that configuration for all future decisions (a server always uses the latest configuration in its log, regardless of whether the entry is committed). Thus, when one requests a configuration change from the current cluster leader, it will immediately use this new, changed configuration.
+  * The leader replicates the configuration change as a Raft log entry, using the ordinary Raft replication mechanism.
+  * Once the majority of the cluster replicates the configuration change, it gets committed, and the cluster will continue its operation on the new configuration.
+  * At any given moment, only a single configuration change can happen. Simultaneous configuration change requests are rejected.
+  * To avoid availability gaps, Raft introduces an additional phase before the configuration change, in which the new servers can join the cluster as Non-Voting members (the leader replicates log entries to them, but they are not considered for majorities). Once the new servers have caught up with the rest of the cluster, they can join the cluster the Voting members without any availability interruption.
+  * In the case when the cluster leader is not part of the new configuration, the leader steps down (returns to follower state) once it has committed the log entry of the new configuration. This means that there will be a period of time (while it is committing the new configuration) when the leader is managing a cluster that does not include itself; it replicates log entries but does not count itself in majorities. The leader transition occurs when the new configuration is committed because this is the first point when the new configuration can operate independently (it will always be possible to choose a leader from the new configuration). Before this point, it may be the case that only a server from the old configuration can be elected leader.
 
 ## Log Compaction | Snapshotting
 
@@ -195,4 +197,4 @@ Sticking with a uniform, monotonically increasing index value, which does not re
 
 ### Does the definition of commitment include the leader itself?
 
-The leader is included in the calculation of majorities, except in the case of joint consensus for the specific case where the leader is not part of the new configuration.
+The leader is included in the calculation of majorities, except in the case of configuration changes for the specific case where the leader is not part of the new configuration.
