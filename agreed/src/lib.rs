@@ -13,7 +13,7 @@ pub mod storage;
 use serde::{de::DeserializeOwned, Serialize};
 
 pub use crate::{
-    config::{Config, ConfigBuilder, SnapshotPolicy},
+    config::{CatchUpTerminationPolicy, Config, ConfigBuilder, SnapshotPolicy},
     core::State,
     error::{ChangeConfigError, ClientWriteError, ConfigError, InitializeError, RaftError},
     metrics::RaftMetrics,

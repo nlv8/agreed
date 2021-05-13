@@ -740,25 +740,6 @@ pub enum ConfigChangeOperation {
     RemovingNode,
 }
 
-/// Policy governing when to terminate a node catch up process.
-///
-/// If a node is not up-to-date to immediately join the cluster, then we need to
-/// make it catch up. In the meantime, the leader enters `CatchingUp` state, in which no
-/// other configuration change may happen. Since we expect such catch-up processes to be fast,
-/// this is not an issue.
-///
-/// However, in rare cases, the node we want to add might struggle to get up to speed. In such
-/// cases, we cannot wait in `CatchingUo` state forever. Thus, we somehow need to determine when
-/// to terminate and fail the catch-up process. This is guide by this enum.
-///
-/// As of now, we only have a single policy (based on a static timeout), but other policies
-/// might be added in the future (such as the dynamic one, described in the Raft dissertation).
-pub enum CatchUpTerminationPolicy {
-    /// The catch-up process will fail if it takes more time than the specified
-    /// milliseconds.
-    Timeout { timeout_milliseconds: u64 },
-}
-
 /// A state enum used by Raft leaders to navigate the consensus protocol.
 pub enum ConsensusState {
     /// The cluster consensus is uniform.
