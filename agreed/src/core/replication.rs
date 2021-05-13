@@ -2,12 +2,14 @@ use tokio::sync::oneshot;
 
 use crate::config::SnapshotPolicy;
 use crate::core::{
-    ConsensusState, LeaderState, ReplicationState, SnapshotState, State, UpdateCurrentLeader,
+    CatchUpTerminationState, ConsensusState, LeaderState, ReplicationState, SnapshotState, State,
+    UpdateCurrentLeader,
 };
 use crate::error::RaftResult;
 use crate::replication::{RaftEvent, ReplicaEvent, ReplicationStream};
 use crate::storage::CurrentSnapshotData;
 use crate::{AppData, AppDataResponse, NodeId, RaftNetwork, RaftStorage};
+use std::sync::atomic::Ordering;
 
 impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>>
     LeaderState<'a, D, R, N, S>
@@ -87,7 +89,17 @@ impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>
                 }
 
                 match std::mem::replace(&mut self.consensus_state, ConsensusState::Uniform) {
-                    ConsensusState::CatchingUp { node, tx, .. } => {
+                    ConsensusState::CatchingUp {
+                        node,
+                        tx,
+                        termination_state,
+                    } if node == target => {
+                        match termination_state {
+                            CatchUpTerminationState::Timeout { already_caught_up } => {
+                                already_caught_up.store(true, Ordering::Release);
+                            }
+                        }
+
                         self.consensus_state = ConsensusState::Uniform;
                         self.add_voter(node, tx).await;
                     }

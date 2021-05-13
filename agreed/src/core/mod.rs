@@ -30,7 +30,8 @@ use crate::raft::{
 };
 use crate::replication::{RaftEvent, ReplicaEvent, ReplicationStream};
 use crate::storage::HardState;
-use crate::{AppData, AppDataResponse, NodeId, RaftNetwork, RaftStorage};
+use crate::{AppData, AppDataResponse, CatchUpTerminationPolicy, NodeId, RaftNetwork, RaftStorage};
+use std::sync::atomic::{AtomicBool, Ordering};
 
 /// The core type implementing the Raft protocol.
 pub struct RaftCore<D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>> {
@@ -594,6 +595,12 @@ struct LeaderState<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: Raf
     /// Once this receiver fires, the config change protocol can proceed and finish.
     pub(super) config_change_committed_cb:
         FuturesOrdered<oneshot::Receiver<Result<u64, RaftError>>>,
+    /// An optional receiver for when to terminate the catch up process of a
+    /// configuration change.
+    ///
+    /// If this receiver fires, then we should cancel the configuration change, and
+    /// go back to `Uniform` state.
+    pub(super) terminate_catch_up_cb: FuturesOrdered<oneshot::Receiver<bool>>,
 }
 
 impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>>
@@ -614,6 +621,7 @@ impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>
             awaiting_committed: Vec::new(),
             config_change_committed_cb: FuturesOrdered::new(),
             config_change_done_cb: None,
+            terminate_catch_up_cb: FuturesOrdered::new(),
         }
     }
 
@@ -706,6 +714,11 @@ impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>
                     let _ = self.core.handle_replicate_to_sm_result(repl_sm_result);
                 }
                 Ok(_) = &mut self.core.rx_shutdown => self.core.set_target_state(State::Shutdown),
+                Some(Ok(should_cancel)) = self.terminate_catch_up_cb.next() => {
+                    if should_cancel {
+                        self.cancel_catch_up_state();
+                    }
+                }
             }
         }
     }
@@ -728,6 +741,36 @@ struct NonVoterReplicationState<D: AppData> {
     pub is_ready_to_join: bool,
     /// The response channel to use for when this node has successfully synced with the cluster.
     pub tx: Option<oneshot::Sender<Result<(), ChangeConfigError>>>,
+}
+
+/// A stateful instantiation of a `CatchUpTerminationPolicy`.
+///
+/// Used for termination-related bookkeeping.
+pub enum CatchUpTerminationState {
+    Timeout { already_caught_up: Arc<AtomicBool> },
+}
+
+impl CatchUpTerminationState {
+    fn new(terminate_tx: oneshot::Sender<bool>, policy: &CatchUpTerminationPolicy) -> Self {
+        match policy {
+            CatchUpTerminationPolicy::Timeout {
+                timeout_milliseconds,
+            } => {
+                let already_caught_up = Arc::new(AtomicBool::new(false));
+
+                let moved_timeout_milliseconds = *timeout_milliseconds;
+                let moved_already_caught_up = Arc::clone(&already_caught_up);
+                tokio::spawn(async move {
+                    tokio::time::sleep(Duration::from_millis(moved_timeout_milliseconds)).await;
+
+                    let should_terminate = !moved_already_caught_up.load(Ordering::Acquire);
+                    let _ = terminate_tx.send(should_terminate);
+                });
+
+                CatchUpTerminationState::Timeout { already_caught_up }
+            }
+        }
+    }
 }
 
 /// The nature of a configuration change.
@@ -754,7 +797,7 @@ pub enum ConsensusState {
     CatchingUp {
         node: NodeId,
         tx: ChangeMembershipTx,
-        termination_policy: CatchUpTerminationPolicy,
+        termination_state: CatchUpTerminationState,
     },
 
     /// A configuration change is in progress.

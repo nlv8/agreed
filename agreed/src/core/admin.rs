@@ -5,7 +5,7 @@ use tokio::sync::oneshot;
 
 use crate::core::client::ClientRequestEntry;
 use crate::core::{
-    CatchUpTerminationPolicy, ConfigChangeOperation, ConsensusState, LeaderState,
+    CatchUpTerminationState, ConfigChangeOperation, ConsensusState, LeaderState,
     NonVoterReplicationState, NonVoterState, State, UpdateCurrentLeader,
 };
 use crate::error::{ChangeConfigError, InitializeError, RaftError};
@@ -150,6 +150,13 @@ impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>
                 );
             }
 
+            let (cancel_catch_up_tx, cancel_catch_up_rx) = oneshot::channel();
+
+            let cancel_catch_up_state = CatchUpTerminationState::new(
+                cancel_catch_up_tx,
+                &self.core.config.catch_up_termination_policy,
+            );
+
             // By entering CatchingUp state, we prevent other configuration
             // changes from happening. Bringing the new node up to speed
             // should happen pretty quickly, so this should not disrupt
@@ -159,11 +166,11 @@ impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>
             // add_voter will be called again automatically.
             self.consensus_state = ConsensusState::CatchingUp {
                 node: id,
-                termination_policy: CatchUpTerminationPolicy::Timeout {
-                    timeout_milliseconds: 500,
-                },
+                termination_state: cancel_catch_up_state,
                 tx,
             };
+
+            self.terminate_catch_up_cb.push(cancel_catch_up_rx);
 
             return;
         }
@@ -290,6 +297,13 @@ impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>
         self.core.report_metrics();
 
         Ok(())
+    }
+
+    pub(super) fn cancel_catch_up_state(&mut self) {
+        let should_cancel = matches!(self.consensus_state, ConsensusState::CatchingUp { .. });
+        if should_cancel {
+            self.consensus_state = ConsensusState::Uniform;
+        }
     }
 
     /// Replicate the requested membership change to other nodes in the cluster via the
