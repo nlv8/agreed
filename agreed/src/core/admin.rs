@@ -5,8 +5,8 @@ use tokio::sync::oneshot;
 
 use crate::core::client::ClientRequestEntry;
 use crate::core::{
-    ConfigChangeOperation, ConsensusState, LeaderState, NonVoterReplicationState, NonVoterState,
-    State, UpdateCurrentLeader,
+    CatchUpTerminationPolicy, ConfigChangeOperation, ConsensusState, LeaderState,
+    NonVoterReplicationState, NonVoterState, State, UpdateCurrentLeader,
 };
 use crate::error::{ChangeConfigError, InitializeError, RaftError};
 use crate::raft::{ChangeMembershipTx, ClientWriteRequest, MembershipConfig};
@@ -157,7 +157,13 @@ impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>
             //
             // Once the new node is brought up to speed,
             // add_voter will be called again automatically.
-            self.consensus_state = ConsensusState::CatchingUp { node: id, tx };
+            self.consensus_state = ConsensusState::CatchingUp {
+                node: id,
+                termination_policy: CatchUpTerminationPolicy::Timeout {
+                    timeout_milliseconds: 500,
+                },
+                tx,
+            };
 
             return;
         }

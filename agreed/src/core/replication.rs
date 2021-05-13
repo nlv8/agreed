@@ -85,13 +85,13 @@ impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>
                 if let Some(tx) = state.tx.take() {
                     let _ = tx.send(Ok(()));
                 }
-                // If we are in NonVoterSync state, and this is one of the nodes being awaiting, then update.
+
                 match std::mem::replace(&mut self.consensus_state, ConsensusState::Uniform) {
-                    ConsensusState::CatchingUp { node, tx } => {
+                    ConsensusState::CatchingUp { node, tx, .. } => {
                         self.consensus_state = ConsensusState::Uniform;
                         self.add_voter(node, tx).await;
                     }
-                    other => self.consensus_state = other, // Set the original value back to what it was.
+                    other => self.consensus_state = other,
                 }
             }
         }
