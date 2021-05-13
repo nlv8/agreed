@@ -35,7 +35,7 @@ pub const DEFAULT_CATCH_UP_TIMEOUT_MILLISECONDS: u64 = 2000;
 ///
 /// As of now, we only have a single policy (based on a static timeout), but other policies
 /// might be added in the future (such as the dynamic one, described in the Raft dissertation).
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum CatchUpTerminationPolicy {
     /// The catch-up process will fail if it takes more time than the specified
     /// milliseconds.
