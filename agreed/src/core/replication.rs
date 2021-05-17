@@ -30,8 +30,8 @@ impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>
             self.replicationtx.clone(),
         );
         ReplicationState {
-            match_index: self.core.last_log_index,
-            match_term: self.core.current_term,
+            match_index: 0,
+            match_term: 0,
             is_at_line_rate: false,
             replstream,
             remove_after_commit: None,
