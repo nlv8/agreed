@@ -204,14 +204,14 @@ impl<D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>> Ra
         // If this is the only configured member and there is live state, then this is
         // a single-node cluster. Become leader.
         if is_only_configured_member && self.last_log_index != u64::min_value() {
-            self.target_state = State::Leader;
+            self.set_target_state(State::Leader);
         }
         // Else if there are other members, that can only mean that state was recovered. Become follower.
         // Here we use a 30 second overhead on the initial next_election_timeout. This is because we need
         // to ensure that restarted nodes don't disrupt a stable cluster by timing out and driving up their
         // term before network communication is established.
         else if !is_only_configured_member {
-            self.target_state = State::Follower;
+            self.set_target_state(State::Follower);
             let inst = Instant::now()
                 + Duration::from_secs(30)
                 + Duration::from_millis(self.config.new_rand_election_timeout());
@@ -219,7 +219,7 @@ impl<D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>> Ra
         }
         // Else, for any other condition, stay non-voter.
         else {
-            self.target_state = State::NonVoter;
+            self.set_target_state(State::NonVoter);
         }
 
         // This is central loop of the system. The Raft core assumes a few different roles based
@@ -274,10 +274,11 @@ impl<D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>> Ra
     /// Update core's target state, ensuring all invariants are upheld.
     #[tracing::instrument(level = "trace", skip(self))]
     fn set_target_state(&mut self, target_state: State) {
-        if target_state == State::Follower && !self.membership.contains(&self.id) {
-            self.target_state = State::NonVoter;
-        }
-        self.target_state = target_state;
+        self.target_state = if target_state == State::Follower && !self.membership.contains(&self.id) {
+            State::NonVoter
+        } else {
+            target_state
+        };
     }
 
     /// Get the next election timeout, generating a new value if not set.
