@@ -22,7 +22,7 @@ pub const DEFAULT_SNAPSHOT_CHUNKSIZE: u64 = 1024 * 1024 * 3;
 /// Default timeout to wait before terminating a configuration change catch-up process.
 pub const DEFAULT_CATCH_UP_TIMEOUT_MILLISECONDS: u64 = 2000;
 
-/// Policy governing when to terminate a node catch up process.
+/// Policy governing when to cancel a node catch up process.
 ///
 /// If a node is not up-to-date to immediately join the cluster, then we need to
 /// make it catch up. In the meantime, the leader enters `CatchingUp` state, in which no
@@ -30,21 +30,25 @@ pub const DEFAULT_CATCH_UP_TIMEOUT_MILLISECONDS: u64 = 2000;
 /// this is not an issue.
 ///
 /// However, in rare cases, the node we want to add might struggle to get up to speed. In such
-/// cases, we cannot wait in `CatchingUo` state forever. Thus, we somehow need to determine when
-/// to terminate and fail the catch-up process. This is guide by this enum.
+/// cases, we cannot wait in `CatchingUp` state forever. Thus, we somehow need to determine when
+/// to cancel and fail the catch-up process. This is guided by this enum.
 ///
 /// As of now, we only have a single policy (based on a static timeout), but other policies
 /// might be added in the future (such as the dynamic one, described in the Raft dissertation).
+///
+/// Please note, that even though we cancel the catch-up state, the affected node (that we
+/// wanted to add to the cluster) will still remain a Non-Voting member, and receive updates.
+/// Thus, clients are free to reattempt the configuration change later.
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub enum CatchUpTerminationPolicy {
+pub enum CatchUpCancellationPolicy {
     /// The catch-up process will fail if it takes more time than the specified
     /// milliseconds.
     Timeout { timeout_milliseconds: u64 },
 }
 
-impl Default for CatchUpTerminationPolicy {
+impl Default for CatchUpCancellationPolicy {
     fn default() -> Self {
-        CatchUpTerminationPolicy::Timeout {
+        CatchUpCancellationPolicy::Timeout {
             timeout_milliseconds: DEFAULT_CATCH_UP_TIMEOUT_MILLISECONDS,
         }
     }
@@ -133,8 +137,8 @@ pub struct Config {
     ///
     /// Defaults to 3Mib.
     pub snapshot_max_chunk_size: u64,
-    /// The termination policy of the configuration change catch-up process used on this Raft node.
-    pub catch_up_termination_policy: CatchUpTerminationPolicy,
+    /// The cancellation policy of the configuration change catch-up process used on this Raft node.
+    pub catch_up_cancellation_policy: CatchUpCancellationPolicy,
 }
 
 impl Config {
@@ -152,7 +156,7 @@ impl Config {
             replication_lag_threshold: None,
             snapshot_policy: None,
             snapshot_max_chunk_size: None,
-            catch_up_termination_policy: None,
+            catch_up_cancellation_policy: None,
         }
     }
 
@@ -184,8 +188,8 @@ pub struct ConfigBuilder {
     pub snapshot_policy: Option<SnapshotPolicy>,
     /// The maximum snapshot chunk size.
     pub snapshot_max_chunk_size: Option<u64>,
-    /// The catch up termination policy.
-    pub catch_up_termination_policy: Option<CatchUpTerminationPolicy>,
+    /// The catch up cancellation policy.
+    pub catch_up_cancellation_policy: Option<CatchUpCancellationPolicy>,
 }
 
 impl ConfigBuilder {
@@ -260,9 +264,9 @@ impl ConfigBuilder {
         let snapshot_max_chunk_size = self
             .snapshot_max_chunk_size
             .unwrap_or(DEFAULT_SNAPSHOT_CHUNKSIZE);
-        let catch_up_termination_policy = self
-            .catch_up_termination_policy
-            .unwrap_or_else(CatchUpTerminationPolicy::default);
+        let catch_up_cancellation_policy = self
+            .catch_up_cancellation_policy
+            .unwrap_or_else(CatchUpCancellationPolicy::default);
         Ok(Config {
             cluster_name: self.cluster_name,
             election_timeout_min,
@@ -272,7 +276,7 @@ impl ConfigBuilder {
             replication_lag_threshold,
             snapshot_policy,
             snapshot_max_chunk_size,
-            catch_up_termination_policy,
+            catch_up_cancellation_policy,
         })
     }
 }

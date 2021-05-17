@@ -30,7 +30,9 @@ use crate::raft::{
 };
 use crate::replication::{RaftEvent, ReplicaEvent, ReplicationStream};
 use crate::storage::HardState;
-use crate::{AppData, AppDataResponse, CatchUpTerminationPolicy, NodeId, RaftNetwork, RaftStorage};
+use crate::{
+    AppData, AppDataResponse, CatchUpCancellationPolicy, NodeId, RaftNetwork, RaftStorage,
+};
 use std::sync::atomic::{AtomicBool, Ordering};
 
 /// The core type implementing the Raft protocol.
@@ -595,12 +597,12 @@ struct LeaderState<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: Raf
     /// Once this receiver fires, the config change protocol can proceed and finish.
     pub(super) config_change_committed_cb:
         FuturesOrdered<oneshot::Receiver<Result<u64, RaftError>>>,
-    /// An optional receiver for when to terminate the catch up process of a
+    /// An optional receiver for when to cancel the catch up process of a
     /// configuration change.
     ///
     /// If this receiver fires, then we should cancel the configuration change, and
     /// go back to `Uniform` state.
-    pub(super) terminate_catch_up_cb: FuturesOrdered<oneshot::Receiver<bool>>,
+    pub(super) cancel_catch_up_cb: FuturesOrdered<oneshot::Receiver<bool>>,
 }
 
 impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>>
@@ -621,7 +623,7 @@ impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>
             awaiting_committed: Vec::new(),
             config_change_committed_cb: FuturesOrdered::new(),
             config_change_done_cb: None,
-            terminate_catch_up_cb: FuturesOrdered::new(),
+            cancel_catch_up_cb: FuturesOrdered::new(),
         }
     }
 
@@ -714,7 +716,7 @@ impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>
                     let _ = self.core.handle_replicate_to_sm_result(repl_sm_result);
                 }
                 Ok(_) = &mut self.core.rx_shutdown => self.core.set_target_state(State::Shutdown),
-                Some(Ok(should_cancel)) = self.terminate_catch_up_cb.next() => {
+                Some(Ok(should_cancel)) = self.cancel_catch_up_cb.next() => {
                     if should_cancel {
                         self.cancel_catch_up_state();
                     }
@@ -743,17 +745,17 @@ struct NonVoterReplicationState<D: AppData> {
     pub tx: Option<oneshot::Sender<Result<(), ChangeConfigError>>>,
 }
 
-/// A stateful instantiation of a `CatchUpTerminationPolicy`.
+/// A stateful instantiation of a `CatchUpCancellationPolicy`.
 ///
-/// Used for termination-related bookkeeping.
-pub enum CatchUpTerminationState {
+/// Used for cancellation-related bookkeeping.
+pub enum CatchUpCancellationState {
     Timeout { already_caught_up: Arc<AtomicBool> },
 }
 
-impl CatchUpTerminationState {
-    fn new(terminate_tx: oneshot::Sender<bool>, policy: &CatchUpTerminationPolicy) -> Self {
+impl CatchUpCancellationState {
+    fn new(cancel_tx: oneshot::Sender<bool>, policy: &CatchUpCancellationPolicy) -> Self {
         match policy {
-            CatchUpTerminationPolicy::Timeout {
+            CatchUpCancellationPolicy::Timeout {
                 timeout_milliseconds,
             } => {
                 let already_caught_up = Arc::new(AtomicBool::new(false));
@@ -763,11 +765,11 @@ impl CatchUpTerminationState {
                 tokio::spawn(async move {
                     tokio::time::sleep(Duration::from_millis(moved_timeout_milliseconds)).await;
 
-                    let should_terminate = !moved_already_caught_up.load(Ordering::Acquire);
-                    let _ = terminate_tx.send(should_terminate);
+                    let should_cancel = !moved_already_caught_up.load(Ordering::Acquire);
+                    let _ = cancel_tx.send(should_cancel);
                 });
 
-                CatchUpTerminationState::Timeout { already_caught_up }
+                CatchUpCancellationState::Timeout { already_caught_up }
             }
         }
     }
@@ -797,7 +799,7 @@ pub enum ConsensusState {
     CatchingUp {
         node: NodeId,
         tx: ChangeMembershipTx,
-        termination_state: CatchUpTerminationState,
+        cancellation_state: CatchUpCancellationState,
     },
 
     /// A configuration change is in progress.

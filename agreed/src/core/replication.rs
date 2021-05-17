@@ -2,7 +2,7 @@ use tokio::sync::oneshot;
 
 use crate::config::SnapshotPolicy;
 use crate::core::{
-    CatchUpTerminationState, ConsensusState, LeaderState, ReplicationState, SnapshotState, State,
+    CatchUpCancellationState, ConsensusState, LeaderState, ReplicationState, SnapshotState, State,
     UpdateCurrentLeader,
 };
 use crate::error::RaftResult;
@@ -92,10 +92,10 @@ impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>
                     ConsensusState::CatchingUp {
                         node,
                         tx,
-                        termination_state,
+                        cancellation_state: termination_state,
                     } if node == target => {
                         match termination_state {
-                            CatchUpTerminationState::Timeout { already_caught_up } => {
+                            CatchUpCancellationState::Timeout { already_caught_up } => {
                                 already_caught_up.store(true, Ordering::Release);
                             }
                         }

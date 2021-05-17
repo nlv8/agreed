@@ -5,7 +5,7 @@ use tokio::sync::oneshot;
 
 use crate::core::client::ClientRequestEntry;
 use crate::core::{
-    CatchUpTerminationState, ConfigChangeOperation, ConsensusState, LeaderState,
+    CatchUpCancellationState, ConfigChangeOperation, ConsensusState, LeaderState,
     NonVoterReplicationState, NonVoterState, State, UpdateCurrentLeader,
 };
 use crate::error::{ChangeConfigError, InitializeError, RaftError};
@@ -152,9 +152,9 @@ impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>
 
             let (cancel_catch_up_tx, cancel_catch_up_rx) = oneshot::channel();
 
-            let cancel_catch_up_state = CatchUpTerminationState::new(
+            let cancel_catch_up_state = CatchUpCancellationState::new(
                 cancel_catch_up_tx,
-                &self.core.config.catch_up_termination_policy,
+                &self.core.config.catch_up_cancellation_policy,
             );
 
             // By entering CatchingUp state, we prevent other configuration
@@ -166,11 +166,11 @@ impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>
             // add_voter will be called again automatically.
             self.consensus_state = ConsensusState::CatchingUp {
                 node: id,
-                termination_state: cancel_catch_up_state,
+                cancellation_state: cancel_catch_up_state,
                 tx,
             };
 
-            self.terminate_catch_up_cb.push(cancel_catch_up_rx);
+            self.cancel_catch_up_cb.push(cancel_catch_up_rx);
 
             return;
         }
@@ -299,10 +299,15 @@ impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>
         Ok(())
     }
 
+    /// Revert to `Uniform` state, and allow new configuration changes to
+    /// take place, as the previous one failed because the node could not
+    /// catch up.
     pub(super) fn cancel_catch_up_state(&mut self) {
-        let should_cancel = matches!(self.consensus_state, ConsensusState::CatchingUp { .. });
-        if should_cancel {
-            self.consensus_state = ConsensusState::Uniform;
+        match std::mem::replace(&mut self.consensus_state, ConsensusState::Uniform) {
+            ConsensusState::CatchingUp { node, tx, .. } => {
+                let _ = tx.send(Err(ChangeConfigError::NodeFailedToCatchUp(node)));
+            }
+            other => self.consensus_state = other,
         }
     }
 

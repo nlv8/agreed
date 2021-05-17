@@ -114,6 +114,11 @@ pub enum ChangeConfigError {
     /// The proposed config changes would make no difference to the current config.
     #[error("the proposed config change would have no effect, this is a no-op")]
     Noop,
+    /// Since the node was not ready to join when attempting to add it to the cluster, we had
+    /// to sync it. However, the syncing process failed to complete on time, and thus we're
+    /// giving up on the configuration change.
+    #[error("could not bring up the node to speed before adding it to cluster, thus gave up.")]
+    NodeFailedToCatchUp(NodeId),
 }
 
 impl<D: AppData> From<ClientWriteError<D>> for ChangeConfigError {
