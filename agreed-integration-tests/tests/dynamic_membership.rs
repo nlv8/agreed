@@ -56,22 +56,7 @@ async fn dynamic_membership() -> Result<()> {
         for node in 1u64..=4 {
             info!("--- Adding node {}", node);
             router.new_raft_node(node).await;
-
-            let add_voter_router = Arc::clone(&router);
-            let voter_added = tokio::spawn(async move {
-                let _ = add_voter_router.add_voter(ORIGINAL_LEADER, node).await;
-            });
-
-            let request_router = Arc::clone(&router);
-            let request_processed = tokio::spawn(async move {
-                sleep_for_a_sec().await;
-
-                request_router
-                    .client_request(ORIGINAL_LEADER, CLIENT_ID, node)
-                    .await;
-            });
-
-            tokio::join!(voter_added, request_processed).0?;
+            let _ = router.add_voter(ORIGINAL_LEADER, node).await;
         }
     }
 
@@ -80,7 +65,7 @@ async fn dynamic_membership() -> Result<()> {
     {
         info!("--- Asserting on the new cluster configuration");
 
-        router.assert_stable_cluster(Some(1), Some(9)).await;
+        router.assert_stable_cluster(Some(1), Some(5)).await;
     }
 
     {
@@ -95,7 +80,7 @@ async fn dynamic_membership() -> Result<()> {
     let new_leader = {
         info!("--- Asserting that a new leader took over");
 
-        router.assert_stable_cluster(Some(2), Some(10)).await;
+        router.assert_stable_cluster(Some(2), Some(6)).await;
         let new_leader = router.leader().await.expect("expected new leader");
         assert_ne!(
             new_leader, ORIGINAL_LEADER,
@@ -118,7 +103,7 @@ async fn dynamic_membership() -> Result<()> {
 
         // We should still be in term 2, as leaders should not be deposed when
         // they are not missing heartbeats.
-        router.assert_stable_cluster(Some(2), Some(10)).await;
+        router.assert_stable_cluster(Some(2), Some(6)).await;
         let current_leader = router
             .leader()
             .await

@@ -61,22 +61,7 @@ async fn stepdown() -> Result<()> {
         for node in 1u64..=3 {
             info!("--- Adding node {}", node);
             router.new_raft_node(node).await;
-
-            let add_voter_router = Arc::clone(&router);
-            let voter_added = tokio::spawn(async move {
-                let _ = add_voter_router.add_voter(original_leader, node).await;
-            });
-
-            let request_router = Arc::clone(&router);
-            let request_processed = tokio::spawn(async move {
-                sleep_for_a_sec().await;
-
-                request_router
-                    .client_request(original_leader, CLIENT_ID, node)
-                    .await;
-            });
-
-            tokio::join!(voter_added, request_processed).0?;
+            let _ = router.add_voter(original_leader, node).await;
         }
 
         original_leader
@@ -106,17 +91,17 @@ async fn stepdown() -> Result<()> {
         );
         // 7 because
         //   1 - initial entry
-        //   2, 3 - add node 1 and a request
-        //   4, 5 - add node 2 and a request
-        //   6, 7 - add node 3 and a request
+        //   2 - add node 1
+        //   3 - add node 2
+        //   4 - add node 3
         assert_eq!(
-            metrics.last_log_index, 7,
-            "expected old leader to have last log index of 7, got {}",
+            metrics.last_log_index, 4,
+            "expected old leader to have last log index of 4, got {}",
             metrics.last_log_index
         );
         assert_eq!(
-            metrics.last_applied, 7,
-            "expected old leader to have last applied of 7, got {}",
+            metrics.last_applied, 4,
+            "expected old leader to have last applied of 4, got {}",
             metrics.last_applied
         );
         assert_eq!(
@@ -130,31 +115,7 @@ async fn stepdown() -> Result<()> {
     {
         info!("--- Old leader stepping down");
 
-        let remove_leader_router = Arc::clone(&router);
-        let leader_removed = tokio::spawn(async move {
-            let _ = remove_leader_router
-                .remove_voter(original_leader, original_leader)
-                .await;
-        });
-
-        let request_router = Arc::clone(&router);
-        let request_processed = tokio::spawn(async move {
-            sleep_for_a_sec().await;
-
-            let new_leader = request_router
-                .latest_metrics()
-                .await
-                .into_iter()
-                .find(|m| m.state == State::Leader)
-                .expect("expected the cluster to have a new leader")
-                .id;
-
-            request_router
-                .client_request(new_leader, CLIENT_ID, 0)
-                .await;
-        });
-
-        tokio::join!(leader_removed, request_processed).0?;
+        let _ = router.remove_voter(original_leader, original_leader).await;
     }
 
     sleep_for_a_sec().await;
@@ -176,18 +137,17 @@ async fn stepdown() -> Result<()> {
             metrics.current_term
         );
         // 10 because
-        //   we carried over 7 from before
-        //   8 - node removal
-        //   9 - request
-        //   10 - the new leader starts its term with a new entry
+        //   we carried over 4 from before
+        //   5 - node removal
+        //   6 - the new leader starts its term with a new entry
         assert_eq!(
-            metrics.last_log_index, 10,
-            "expected the new leader to have last log index of 10, got {}",
+            metrics.last_log_index, 6,
+            "expected the new leader to have last log index of 6, got {}",
             metrics.last_log_index
         );
         assert_eq!(
-            metrics.last_applied, 10,
-            "expected the new leader to have last applied of 10, got {}",
+            metrics.last_applied, 6,
+            "expected the new leader to have last applied of 6, got {}",
             metrics.last_applied
         );
         assert_eq!(

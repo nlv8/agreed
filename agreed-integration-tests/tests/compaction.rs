@@ -105,23 +105,12 @@ async fn compaction() -> Result<()> {
             .add_non_voter(ORIGINAL_LEADER, ADDED_FOLLOWER)
             .await
             .expect("failed to add new node as non-voter");
-        let add_voter_router = Arc::clone(&router);
-        let voter_added = tokio::spawn(async move {
-            let _ = add_voter_router
-                .add_voter(ORIGINAL_LEADER, ADDED_FOLLOWER)
-                .await;
-        });
 
-        let request_router = Arc::clone(&router);
-        let request_processed = tokio::spawn(async move {
-            sleep_for_a_sec().await;
+        sleep_for_a_sec().await;
 
-            request_router
-                .client_request(ORIGINAL_LEADER, CLIENT_ID, 1)
-                .await;
-        });
-
-        tokio::join!(voter_added, request_processed).0?;
+        let _ = router
+            .add_voter(ORIGINAL_LEADER, ADDED_FOLLOWER)
+            .await;
     }
 
     sleep_for_a_sec().await;
@@ -129,11 +118,9 @@ async fn compaction() -> Result<()> {
     {
         info!("--- Asserting whether the follower received the snapshot");
 
-        // +2 because
-        //   1 - config change
-        //   2 - additional request
+        // +1 because of the config change
         router
-            .assert_stable_cluster(Some(1), Some(ENTRIES_BETWEEN_SNAPSHOTS_LIMIT + 2))
+            .assert_stable_cluster(Some(1), Some(ENTRIES_BETWEEN_SNAPSHOTS_LIMIT + 1))
             .await;
 
         let expected_snapshot = Some((
@@ -147,9 +134,9 @@ async fn compaction() -> Result<()> {
         router
             .assert_storage_state(
                 1,
-                ENTRIES_BETWEEN_SNAPSHOTS_LIMIT + 2,
+                ENTRIES_BETWEEN_SNAPSHOTS_LIMIT + 1,
                 None, // This value is None because non-voters do not vote.
-                ENTRIES_BETWEEN_SNAPSHOTS_LIMIT + 2,
+                ENTRIES_BETWEEN_SNAPSHOTS_LIMIT, // no +1 because the additional entry was a config change
                 expected_snapshot,
             )
             .await;
