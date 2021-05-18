@@ -108,9 +108,7 @@ async fn compaction() -> Result<()> {
 
         sleep_for_a_sec().await;
 
-        let _ = router
-            .add_voter(ORIGINAL_LEADER, ADDED_FOLLOWER)
-            .await;
+        let _ = router.add_voter(ORIGINAL_LEADER, ADDED_FOLLOWER).await;
     }
 
     sleep_for_a_sec().await;

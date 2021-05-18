@@ -274,11 +274,12 @@ impl<D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>> Ra
     /// Update core's target state, ensuring all invariants are upheld.
     #[tracing::instrument(level = "trace", skip(self))]
     fn set_target_state(&mut self, target_state: State) {
-        self.target_state = if target_state == State::Follower && !self.membership.contains(&self.id) {
-            State::NonVoter
-        } else {
-            target_state
-        };
+        self.target_state =
+            if target_state == State::Follower && !self.membership.contains(&self.id) {
+                State::NonVoter
+            } else {
+                target_state
+            };
     }
 
     /// Get the next election timeout, generating a new value if not set.

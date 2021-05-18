@@ -54,7 +54,9 @@ async fn cancel_catch_up() -> Result<()> {
     {
         info!("--- Add few entries");
 
-        router.client_request_many(ORIGINAL_LEADER, CLIENT_ID, 5000).await;
+        router
+            .client_request_many(ORIGINAL_LEADER, CLIENT_ID, 5000)
+            .await;
         sleep_for_a_sec().await;
         router.assert_stable_cluster(Some(1), Some(5001)).await;
     }
