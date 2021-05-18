@@ -235,6 +235,12 @@ impl ConfigBuilder {
         self
     }
 
+    /// Set the desired value for `catch_up_cancellation_policy`.
+    pub fn catch_up_cancellation_policy(mut self, val: CatchUpCancellationPolicy) -> Self {
+        self.catch_up_cancellation_policy = Some(val);
+        self
+    }
+
     /// Validate the state of this builder and produce a new `Config` instance if valid.
     pub fn validate(self) -> Result<Config, ConfigError> {
         // Roll a random election time out based on the configured min & max or their respective defaults.
