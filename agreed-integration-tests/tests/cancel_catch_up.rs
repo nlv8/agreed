@@ -2,7 +2,7 @@ mod fixtures;
 
 use std::sync::Arc;
 
-use agreed::Config;
+use agreed::{CatchUpCancellationPolicy, Config};
 use anyhow::Result;
 
 use fixtures::{sleep_for_a_sec, RaftRouter};
@@ -13,6 +13,7 @@ const NODE_TO_ADD: u64 = 1;
 const CLIENT_ID: &str = "client";
 const CLUSTER_NAME: &str = "test";
 const BULK_REQUEST_ENTRY_COUNT: u64 = 5000;
+const CANCELLATION_TIMEOUT_MILLISECONDS: u64 = 3000;
 
 /// Cancel catch-up test.
 ///
@@ -34,6 +35,9 @@ async fn cancel_catch_up() -> Result<()> {
 
         let config = Arc::new(
             Config::build(CLUSTER_NAME.into())
+                .catch_up_cancellation_policy(CatchUpCancellationPolicy::Timeout {
+                    timeout_milliseconds: CANCELLATION_TIMEOUT_MILLISECONDS,
+                })
                 .validate()
                 .expect("failed to build Raft config"),
         );
