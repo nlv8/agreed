@@ -56,10 +56,16 @@ async fn cancel_catch_up() -> Result<()> {
         info!("--- Add few entries");
 
         router
-            .client_request_many(ORIGINAL_LEADER, CLIENT_ID, BULK_REQUEST_ENTRY_COUNT as usize)
+            .client_request_many(
+                ORIGINAL_LEADER,
+                CLIENT_ID,
+                BULK_REQUEST_ENTRY_COUNT as usize,
+            )
             .await;
         sleep_for_a_sec().await;
-        router.assert_stable_cluster(Some(1), Some(BULK_REQUEST_ENTRY_COUNT + 1)).await;
+        router
+            .assert_stable_cluster(Some(1), Some(BULK_REQUEST_ENTRY_COUNT + 1))
+            .await;
     }
 
     let add_voter_result = {
@@ -90,7 +96,9 @@ async fn cancel_catch_up() -> Result<()> {
     {
         info!("--- Asserting on the new cluster configuration");
 
-        router.assert_stable_cluster(Some(1), Some(BULK_REQUEST_ENTRY_COUNT + 2)).await;
+        router
+            .assert_stable_cluster(Some(1), Some(BULK_REQUEST_ENTRY_COUNT + 2))
+            .await;
     }
 
     Ok(())
