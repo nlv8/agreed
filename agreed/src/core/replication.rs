@@ -23,7 +23,6 @@ impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>
             self.core.current_term,
             self.core.config.clone(),
             self.core.last_log_index,
-            self.core.last_log_term,
             self.core.commit_index,
             self.core.network.clone(),
             self.core.storage.clone(),
