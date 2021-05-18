@@ -9,7 +9,6 @@ use fixtures::{sleep_for_a_sec, RaftRouter};
 use tracing::info;
 
 const ORIGINAL_LEADER: u64 = 0;
-const CLIENT_ID: &str = "client";
 const CLUSTER_NAME: &str = "test";
 
 /// Dynamic membership test.

@@ -10,7 +10,6 @@ use tracing::info;
 use fixtures::{sleep_for_a_sec, RaftRouter};
 
 const CLUSTER_NAME: &str = "test";
-const CLIENT_ID: &str = "client";
 
 /// Leader stepdown test.
 ///

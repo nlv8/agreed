@@ -12,6 +12,7 @@ const ORIGINAL_LEADER: u64 = 0;
 const NODE_TO_ADD: u64 = 1;
 const CLIENT_ID: &str = "client";
 const CLUSTER_NAME: &str = "test";
+const BULK_REQUEST_ENTRY_COUNT: u64 = 5000;
 
 /// Cancel catch-up test.
 ///
@@ -55,10 +56,10 @@ async fn cancel_catch_up() -> Result<()> {
         info!("--- Add few entries");
 
         router
-            .client_request_many(ORIGINAL_LEADER, CLIENT_ID, 5000)
+            .client_request_many(ORIGINAL_LEADER, CLIENT_ID, BULK_REQUEST_ENTRY_COUNT as usize)
             .await;
         sleep_for_a_sec().await;
-        router.assert_stable_cluster(Some(1), Some(5001)).await;
+        router.assert_stable_cluster(Some(1), Some(BULK_REQUEST_ENTRY_COUNT + 1)).await;
     }
 
     let add_voter_result = {
@@ -81,7 +82,7 @@ async fn cancel_catch_up() -> Result<()> {
         info!("--- Actually adding the new node");
 
         router.restore_node(NODE_TO_ADD).await;
-        router.add_voter(ORIGINAL_LEADER, NODE_TO_ADD).await;
+        let _ = router.add_voter(ORIGINAL_LEADER, NODE_TO_ADD).await;
     }
 
     sleep_for_a_sec().await;
@@ -89,7 +90,7 @@ async fn cancel_catch_up() -> Result<()> {
     {
         info!("--- Asserting on the new cluster configuration");
 
-        router.assert_stable_cluster(Some(1), Some(5002)).await;
+        router.assert_stable_cluster(Some(1), Some(BULK_REQUEST_ENTRY_COUNT + 2)).await;
     }
 
     Ok(())
