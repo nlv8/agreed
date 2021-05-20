@@ -31,6 +31,7 @@ impl<D: AppData> ReplicationStream<D> {
         term: u64,
         config: Arc<Config>,
         last_log_index: u64,
+        last_log_term: u64,
         commit_index: u64,
         network: Arc<N>,
         storage: Arc<S>,
@@ -42,6 +43,7 @@ impl<D: AppData> ReplicationStream<D> {
             term,
             config,
             last_log_index,
+            last_log_term,
             commit_index,
             network,
             storage,
@@ -144,6 +146,7 @@ impl<D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>>
         term: u64,
         config: Arc<Config>,
         last_log_index: u64,
+        _last_log_term: u64,
         commit_index: u64,
         network: Arc<N>,
         storage: Arc<S>,
@@ -167,6 +170,8 @@ impl<D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>>
             next_index: last_log_index + 1,
             match_index: 0,
             match_term: 0,
+            //match_index: last_log_index,
+            //match_term: last_log_term,
             rafttx,
             raftrx,
             heartbeat: interval(heartbeat_timeout),
@@ -686,7 +691,11 @@ impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>
     /// Check if this replication stream is now up-to-speed.
     #[tracing::instrument(level="trace", skip(self), fields(self.core.next_index, self.core.commit_index))]
     fn is_up_to_speed(&self) -> bool {
-        self.core.next_index > self.core.commit_index
+        // self.core.next_index > self.core.commit_index
+        // Raft spec
+        // Then, once the matchIndex immediately precedes the nextIndex,
+        // the leader should begin to send the actual entries.
+        self.core.match_index == self.core.next_index - 1
     }
 
     /// Prep the outbound buffer with the next payload of entries to append.
@@ -695,7 +704,8 @@ impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>
         // If the send buffer is empty, we need to fill it.
         if self.core.outbound_buffer.is_empty() {
             // Determine an appropriate stop index for the storage fetch operation. Avoid underflow.
-            let distance_behind = self.core.commit_index - self.core.next_index; // Underflow is guarded against in the `is_up_to_speed` check in the outer loop.
+            let distance_behind = self.core.commit_index - self.core.match_index; // Underflow is guarded against in the `is_up_to_speed` check in the outer loop.
+
             let is_within_payload_distance =
                 distance_behind <= self.core.config.max_payload_entries;
             let stop_idx = if is_within_payload_distance {
@@ -704,15 +714,15 @@ impl<'a, D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>
                 self.core.target_state = TargetReplState::LineRate; // Will continue in lagging state until the outer loop cycles.
                 self.core.commit_index + 1 // +1 to ensure stop value is included.
             } else {
-                self.core.next_index + self.core.config.max_payload_entries + 1 // +1 to ensure stop value is included.
+                self.core.match_index + self.core.config.max_payload_entries + 1
+                // +1 to ensure stop value is included.
             };
-
             // Bringing the target up-to-date by fetching the largest possible payload of entries
             // from storage within permitted configuration & ensure no snapshot pointer was returned.
             let entries = match self
                 .core
                 .storage
-                .get_log_entries(self.core.next_index, stop_idx)
+                .get_log_entries(self.core.match_index, stop_idx)
                 .await
             {
                 Ok(entries) => entries,

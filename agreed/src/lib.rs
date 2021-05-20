@@ -22,6 +22,7 @@ pub use crate::{
     storage::RaftStorage,
 };
 pub use async_trait;
+use std::fmt::Debug;
 
 /// A Raft node's ID.
 pub type NodeId = u64;
@@ -34,7 +35,7 @@ pub type NodeId = u64;
 /// models as-is to Raft, Raft will present it to the application's `RaftStorage` impl when ready,
 /// and the application may then deal with the data directly in the storage engine without having
 /// to do a preliminary deserialization.
-pub trait AppData: Clone + Send + Sync + Serialize + DeserializeOwned + 'static {}
+pub trait AppData: Debug + Clone + Send + Sync + Serialize + DeserializeOwned + 'static {}
 
 /// A trait defining application specific response data.
 ///

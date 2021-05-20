@@ -201,6 +201,7 @@ impl<D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>> Ra
         // Set initial state based on state recovered from disk.
         let is_only_configured_member =
             self.membership.members.len() == 1 && self.membership.contains(&self.id);
+
         // If this is the only configured member and there is live state, then this is
         // a single-node cluster. Become leader.
         if is_only_configured_member && self.last_log_index != u64::min_value() {
@@ -274,12 +275,11 @@ impl<D: AppData, R: AppDataResponse, N: RaftNetwork<D>, S: RaftStorage<D, R>> Ra
     /// Update core's target state, ensuring all invariants are upheld.
     #[tracing::instrument(level = "trace", skip(self))]
     fn set_target_state(&mut self, target_state: State) {
-        self.target_state =
-            if target_state == State::Follower && !self.membership.contains(&self.id) {
-                State::NonVoter
-            } else {
-                target_state
-            };
+        if target_state == State::Follower && !self.membership.contains(&self.id) {
+            self.target_state = State::NonVoter;
+        } else {
+            self.target_state = target_state;
+        }
     }
 
     /// Get the next election timeout, generating a new value if not set.
